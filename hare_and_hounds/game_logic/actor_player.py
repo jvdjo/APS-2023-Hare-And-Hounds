@@ -35,7 +35,7 @@ class ActorPlayer(PyNetgamesServerListener):
 
         self.conexao_menu = tk.Menu(self.menu)
         self.menu.add_cascade(label="Conexão", menu=self.conexao_menu)
-        self.conexao_menu.add_command(label="Iniciar conexão", command=self.iniciar_conexao())
+        self.conexao_menu.add_command(label="Iniciar conexão", command=self.iniciar_conexao)
 
         self.canvas = tk.Canvas(self.mainWindow, width=self.cols*150, height=self.rows*150)
         self.canvas.pack()
@@ -77,7 +77,6 @@ class ActorPlayer(PyNetgamesServerListener):
         # Adicionar o botão "Reiniciar partida"
         self.botao_reiniciar = tk.Button(self.mainWindow, text="Reiniciar partida", command=self.reset)
         self.botao_reiniciar.pack(side=tk.BOTTOM, pady=10)  # Aumentei o espaço entre o botão e o canvas
-        self.iniciar_conexao()
         self.mainWindow.mainloop()
 
     def iniciar_conexao(self):
@@ -150,7 +149,8 @@ class ActorPlayer(PyNetgamesServerListener):
         self.server_proxy.add_listener(self)
 
     def send_connect(self):
-        self.server_proxy.send_connect("wss//py-netgames-server.fly.dev")
+        self.server_proxy.send_connect()
+        print("****** ENVIANDO CONEXÃO ******")
 
     def receive_connection_success(self):
         print("****** CONECTADO ******")
