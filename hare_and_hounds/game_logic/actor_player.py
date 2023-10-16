@@ -148,12 +148,16 @@ class ActorPlayer(PyNetgamesServerListener):
         self.server_proxy = PyNetgamesServerProxy()
         self.server_proxy.add_listener(self)
 
+    def send_match(self):
+        self.server_proxy.send_match(2)
+
     def send_connect(self):
         self.server_proxy.send_connect()
         print("****** ENVIANDO CONEXÃO ******")
 
     def receive_connection_success(self):
         print("****** CONECTADO ******")
+        self.send_match()
     
     def receive_disconnect(self):
         return super().receive_disconnect()
@@ -162,7 +166,9 @@ class ActorPlayer(PyNetgamesServerListener):
         return super().receive_error(error)
     
     def receive_match(self, match: MatchStartedMessage):
-        return super().receive_match(match)
+        print("****** PARTIDA INICIADA ******")
+        print("****** ORDEM: ", match.position)
+        print("****** match_id: ", match.match_id)
     
     def receive_move(self, match: MoveMessage):
         return super().receive_move(match)
