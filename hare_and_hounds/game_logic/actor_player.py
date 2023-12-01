@@ -68,7 +68,7 @@ class ActorPlayer(PyNetgamesServerListener):
         self._board._board = [[None for _ in range(self.cols)]
                               for _ in range(self.rows)]
 
-        self._board.total_jogadas = 0
+        self._board._total_jogadas = 0
 
         cao_1_x = 3 * self.cell_width + self.cell_width//4
         cao_1_y = 0 * self.cell_height + self.cell_height//4
@@ -95,6 +95,7 @@ class ActorPlayer(PyNetgamesServerListener):
         if item and len(item) > 0:
             item = item[0]
             self._drag_data = {'x': event.x, 'y': event.y, 'item': item}
+            print(item)
             self.origem_x = event.x//150
             self.origem_y = event.y//150
 
@@ -155,8 +156,9 @@ class ActorPlayer(PyNetgamesServerListener):
                 self._board._board[self.origem_y][self.origem_x] = None
                 self.origem_x = None
                 self.origem_y = None
-                self._board.total_jogadas += 1
+                self._board._total_jogadas += 1
                 self._board._is_turn = False
+                print("BOARD AO MANDAR MOVIMENTO", self._board._board)
                 self.send_move()
 
             else:
@@ -184,19 +186,14 @@ class ActorPlayer(PyNetgamesServerListener):
         #     print(self._board._board[i])
         #     print()
 
-    def atualizar_tela(self, matriz):
-        self._board._board = matriz
+    def atualizar_tela(self):
         print("#############RECEBIDO#################")
-        for i in range(len(self._board._board)):
-            print(self._board._board[i])
-            print()
-
         for x in range(self.rows):
             for y in range(self.cols):
                 if (self._board._board[x][y] != None):
-                    target_x = x * 150 + 37.5  # Centralize a imagem nas células da matriz
-                    target_y = y * 150 + 37.5  # Centralize a imagem nas células da matriz
-                    self.canvas.coords(5, target_x, target_y)
+                    target_x = x * self.cell_width + self.cell_width//4  # Centralize a imagem nas células da matriz
+                    target_y = y * self.cell_height + self.cell_height//4  # Centralize a imagem nas células da matriz
+                    self.canvas.coords(self._board._board[x][y], target_y, target_x)
 
     def reset(self):
         self.origem_x = None
@@ -206,7 +203,7 @@ class ActorPlayer(PyNetgamesServerListener):
         self._board._board = [[None for _ in range(self.cols)]
                               for _ in range(self.rows)]
 
-        self._board.total_jogadas = 0
+        self._board._total_jogadas = 0
 
         cao_1_x = 3 * self.cell_width + self.cell_width//4
         cao_1_y = 0 * self.cell_height + self.cell_height//4
@@ -229,12 +226,8 @@ class ActorPlayer(PyNetgamesServerListener):
         self._board._board[1][0] = self.lebre.objeto
 
     def run(self):
-        self.preparacao_jogo()
         self._server_proxy.add_listener(self)
         self._tk.mainloop()
-
-    # def send_match(self):
-    #     self.server_proxy.send_match(2)
 
     def receive_connection_success(self):
         self._menu_bar.connection_confirmed()
@@ -251,12 +244,12 @@ class ActorPlayer(PyNetgamesServerListener):
 
     def receive_move(self, message: MoveMessage):
         print("JOGADA RECEBIDA")
-        print(message.payload)
         self._board = Board.from_dict(message.payload).flip()
-        print(self._board._is_turn)
-        self.atualizar_tela(message.payload["_board"])
+        print(self._board)
+        self.atualizar_tela()
 
     def receive_error(self, error: Exception):
+        print("ACONTECEU UM ERRO")
         self._menu_bar.connection_error(error)
         self._ongoing_match = False
         self.preparacao_jogo()

@@ -4,11 +4,10 @@ import tkinter as tk
 
 class Peca_base:
     def __init__(self, canvas : tk.Canvas, x, y, image_path):
-        self.canvas = canvas
         self.image = Image.open(image_path)
         self.image = self.image.resize((75, 75))
         self.photo = ImageTk.PhotoImage(self.image)
-        self.objeto = self.canvas.create_image(x, y, anchor=tk.NW, image=self.photo, tags="draggable")
+        self.objeto = canvas.create_image(x, y, anchor=tk.NW, image=self.photo, tags="draggable")
 
 class Hound(Peca_base):
     def __init__(self, canvas, x, y):
