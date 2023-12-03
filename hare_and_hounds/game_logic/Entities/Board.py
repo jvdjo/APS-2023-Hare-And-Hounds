@@ -1,11 +1,6 @@
-from enum import Enum
 from dataclasses import dataclass
 from typing import Optional, Tuple, List, Literal, Dict
-
-
-class Animal(Enum):
-    Hare = 1
-    Hound = 2
+from hare_and_hounds.game_logic.Entities.Pecas import Animal
     
 
 @dataclass
@@ -14,6 +9,7 @@ class Board:
     _is_turn: bool
     _total_jogadas: int
     _animal: Animal
+    _pecas : []
 
     def __init__(self, position: int = 0):
         self._board = [[None for _ in range(3)]

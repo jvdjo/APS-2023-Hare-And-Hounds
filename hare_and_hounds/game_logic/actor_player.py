@@ -8,6 +8,7 @@ from hare_and_hounds.game_logic.Entities.Pecas import Hare, Hound
 from hare_and_hounds.game_logic.Entities.Board import Board
 from hare_and_hounds.game_logic.MenuBar import Menubar
 from typing import Optional
+from hare_and_hounds.game_logic.Entities.Pecas import Animal, Peca_base
 
 
 class ActorPlayer(PyNetgamesServerListener):
@@ -72,30 +73,32 @@ class ActorPlayer(PyNetgamesServerListener):
 
         cao_1_x = 3 * self.cell_width + self.cell_width//4
         cao_1_y = 0 * self.cell_height + self.cell_height//4
-        self.cao_1 = Hound(self.canvas, cao_1_x, cao_1_y)
+        self.cao_1 = Hound(self.canvas, cao_1_x, cao_1_y, Animal.Hound)
         self._board._board[0][3] = self.cao_1.objeto
 
         cao_2_x = 4 * self.cell_width + self.cell_width//4
         cao_2_y = 1 * self.cell_height + self.cell_height//4
-        self.cao_2 = Hound(self.canvas, cao_2_x, cao_2_y)
+        self.cao_2 = Hound(self.canvas, cao_2_x, cao_2_y, Animal.Hound)
         self._board._board[1][4] = self.cao_2.objeto
 
         cao_3_x = 3 * self.cell_width + self.cell_width//4
         cao_3_y = 2 * self.cell_height + self.cell_height//4
-        self.cao_3 = Hound(self.canvas, cao_3_x, cao_3_y)
+        self.cao_3 = Hound(self.canvas, cao_3_x, cao_3_y, Animal.Hound)
         self._board._board[2][3] = self.cao_3.objeto
 
         lebre_x = 0 * self.cell_width + self.cell_width//4
         lebre_y = 1 * self.cell_height + self.cell_height//4
-        self.lebre = Hare(self.canvas, lebre_x, lebre_y)
+        self.lebre = Hare(self.canvas, lebre_x, lebre_y, Animal.Hare)
         self._board._board[1][0] = self.lebre.objeto
+
+        self._board._pecas = [self.cao_1, self.cao_2, self.cao_3, self.lebre] 
+
 
     def iniciar_arraste(self, event):
         item = self.canvas.find_withtag(tk.CURRENT)
         if item and len(item) > 0:
             item = item[0]
             self._drag_data = {'x': event.x, 'y': event.y, 'item': item}
-            print(item)
             self.origem_x = event.x//150
             self.origem_y = event.y//150
 
@@ -152,13 +155,11 @@ class ActorPlayer(PyNetgamesServerListener):
                 target_y = row * 150 + 37.5  # Centralize a imagem nas células da matriz
                 self.canvas.coords(self._drag_data['item'], target_x, target_y)
                 self._board._board[row][col] = self._drag_data['item']
-                # print(self._drag_data)
                 self._board._board[self.origem_y][self.origem_x] = None
                 self.origem_x = None
                 self.origem_y = None
                 self._board._total_jogadas += 1
                 self._board._is_turn = False
-                print("BOARD AO MANDAR MOVIMENTO", self._board._board)
                 self.send_move()
 
             else:
@@ -181,19 +182,17 @@ class ActorPlayer(PyNetgamesServerListener):
             self.origem_x = None
             self.origem_y = None
 
-        # print("#####################################")
-        # for i in range(len(self._board._board)):
-        #     print(self._board._board[i])
-        #     print()
-
     def atualizar_tela(self):
         print("#############RECEBIDO#################")
         for x in range(self.rows):
             for y in range(self.cols):
                 if (self._board._board[x][y] != None):
-                    target_x = x * self.cell_width + self.cell_width//4  # Centralize a imagem nas células da matriz
-                    target_y = y * self.cell_height + self.cell_height//4  # Centralize a imagem nas células da matriz
-                    self.canvas.coords(self._board._board[x][y], target_y, target_x)
+                    # Centralize a imagem nas células da matriz
+                    target_x = x * self.cell_width + self.cell_width//4
+                    # Centralize a imagem nas células da matriz
+                    target_y = y * self.cell_height + self.cell_height//4
+                    self.canvas.coords(
+                        self._board._board[x][y], target_y, target_x)
 
     def reset(self):
         self.origem_x = None
@@ -243,8 +242,12 @@ class ActorPlayer(PyNetgamesServerListener):
         print("****** match_id: ", message.match_id)
 
     def receive_move(self, message: MoveMessage):
-        print("JOGADA RECEBIDA")
-        self._board = Board.from_dict(message.payload).flip()
+        board = Board.from_dict(message.payload)
+        self._board._total_jogadas = board._total_jogadas
+        self._board._is_turn = board._is_turn
+        self._board._total_jogadas = board._total_jogadas
+        self._board._board = board._board
+        self._board.flip()
         print(self._board)
         self.atualizar_tela()
 
@@ -263,6 +266,3 @@ class ActorPlayer(PyNetgamesServerListener):
         print("##############ENVIADO###############")
         self._server_proxy.send_move(
             self._match_id, self._board.to_dict())
-        # for i in range(len(self._board._board)):
-        #     print(self._board._board[i])
-        #     print()
