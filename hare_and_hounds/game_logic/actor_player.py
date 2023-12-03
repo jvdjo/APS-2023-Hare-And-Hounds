@@ -91,76 +91,87 @@ class ActorPlayer(PyNetgamesServerListener):
         self.lebre = Hare(self.canvas, lebre_x, lebre_y, Animal.Hare)
         self._board._board[1][0] = self.lebre.objeto
 
-        self._board._pecas = [self.cao_1, self.cao_2, self.cao_3, self.lebre] 
-
-
     def iniciar_arraste(self, event):
         item = self.canvas.find_withtag(tk.CURRENT)
         if item and len(item) > 0:
             item = item[0]
-            self._drag_data = {'x': event.x, 'y': event.y, 'item': item}
-            self.origem_x = event.x//150
-            self.origem_y = event.y//150
+            if (item == 5 and self._board._animal == Animal.Hare) or (item != 5 and self._board._animal == Animal.Hound):
+                self._drag_data = {'x': event.x, 'y': event.y, 'item': item}
+                print(self._drag_data)
+                self.origem_x = event.x//150
+                self.origem_y = event.y//150
 
     def arrastar(self, event):
-        delta_x = event.x - self._drag_data['x']
-        delta_y = event.y - self._drag_data['y']
-        self.canvas.move(self._drag_data['item'], delta_x, delta_y)
-        self._drag_data['x'] = event.x
-        self._drag_data['y'] = event.y
+        if(self.origem_x != None and self.origem_y != None):
+            delta_x = event.x - self._drag_data['x']
+            delta_y = event.y - self._drag_data['y']
+            self.canvas.move(self._drag_data['item'], delta_x, delta_y)
+            self._drag_data['x'] = event.x
+            self._drag_data['y'] = event.y
 
     def soltar(self, event):
-        if (self._board._is_turn == True):
-            x, y = event.x, event.y
-            col = x // 150
-            row = y // 150
+        if(self.origem_x != None and self.origem_y != None):
+            if (self._board._is_turn == True):
+                x, y = event.x, event.y
+                col = x // 150
+                row = y // 150
 
-            if col >= self.cols:
-                col = self.cols - 1
+                if col >= self.cols:
+                    col = self.cols - 1
 
-            if (row == 0 and col == 0):
-                target_x = self.origem_x * 150 + 37.5
-                target_y = self.origem_y * 150 + 37.5
-                self.canvas.coords(self._drag_data['item'], target_x, target_y)
-                self.origem_x = None
-                self.origem_y = None
-                return
+                if (row == 0 and col == 0):
+                    target_x = self.origem_x * 150 + 37.5
+                    target_y = self.origem_y * 150 + 37.5
+                    self.canvas.coords(self._drag_data['item'], target_x, target_y)
+                    self.origem_x = None
+                    self.origem_y = None
+                    return
 
-            if (row == 0 and col == 4):
-                target_x = self.origem_x * 150 + 37.5
-                target_y = self.origem_y * 150 + 37.5
-                self.canvas.coords(self._drag_data['item'], target_x, target_y)
-                self.origem_x = None
-                self.origem_y = None
-                return
+                if (row == 0 and col == 4):
+                    target_x = self.origem_x * 150 + 37.5
+                    target_y = self.origem_y * 150 + 37.5
+                    self.canvas.coords(self._drag_data['item'], target_x, target_y)
+                    self.origem_x = None
+                    self.origem_y = None
+                    return
 
-            if (row == 2 and col == 0):
-                target_x = self.origem_x * 150 + 37.5
-                target_y = self.origem_y * 150 + 37.5
-                self.canvas.coords(self._drag_data['item'], target_x, target_y)
-                self.origem_x = None
-                self.origem_y = None
-                return
+                if (row == 2 and col == 0):
+                    target_x = self.origem_x * 150 + 37.5
+                    target_y = self.origem_y * 150 + 37.5
+                    self.canvas.coords(self._drag_data['item'], target_x, target_y)
+                    self.origem_x = None
+                    self.origem_y = None
+                    return
 
-            if (row == 2 and col == 4):
-                target_x = self.origem_x * 150 + 37.5
-                target_y = self.origem_y * 150 + 37.5
-                self.canvas.coords(self._drag_data['item'], target_x, target_y)
-                self.origem_x = None
-                self.origem_y = None
-                return
+                if (row == 2 and col == 4):
+                    target_x = self.origem_x * 150 + 37.5
+                    target_y = self.origem_y * 150 + 37.5
+                    self.canvas.coords(self._drag_data['item'], target_x, target_y)
+                    self.origem_x = None
+                    self.origem_y = None
+                    return
 
-            if self._board._board[row][col] is None:
-                target_x = col * 150 + 37.5  # Centralize a imagem nas células da matriz
-                target_y = row * 150 + 37.5  # Centralize a imagem nas células da matriz
-                self.canvas.coords(self._drag_data['item'], target_x, target_y)
-                self._board._board[row][col] = self._drag_data['item']
-                self._board._board[self.origem_y][self.origem_x] = None
-                self.origem_x = None
-                self.origem_y = None
-                self._board._total_jogadas += 1
-                self._board._is_turn = False
-                self.send_move()
+                if self._board._board[row][col] is None:
+                    target_x = col * 150 + 37.5  # Centralize a imagem nas células da matriz
+                    target_y = row * 150 + 37.5  # Centralize a imagem nas células da matriz
+                    self.canvas.coords(self._drag_data['item'], target_x, target_y)
+                    self._board._board[row][col] = self._drag_data['item']
+                    self._board._board[self.origem_y][self.origem_x] = None
+                    self.origem_x = None
+                    self.origem_y = None
+                    self._board._total_jogadas += 1
+                    self._board._is_turn = False
+                    self.send_move()
+
+                else:
+                    # A posição na matriz está ocupada, retorne a peça à posição original
+                    # Centralize a imagem nas células da matriz
+                    target_x = self.origem_x * 150 + 37.5
+                    # Centralize a imagem nas células da matriz
+                    target_y = self.origem_y * 150 + 37.5
+                    self.canvas.coords(self._drag_data['item'], target_x, target_y)
+                    self.origem_x = None
+                    self.origem_y = None
 
             else:
                 # A posição na matriz está ocupada, retorne a peça à posição original
@@ -171,16 +182,6 @@ class ActorPlayer(PyNetgamesServerListener):
                 self.canvas.coords(self._drag_data['item'], target_x, target_y)
                 self.origem_x = None
                 self.origem_y = None
-
-        else:
-            # A posição na matriz está ocupada, retorne a peça à posição original
-            # Centralize a imagem nas células da matriz
-            target_x = self.origem_x * 150 + 37.5
-            # Centralize a imagem nas células da matriz
-            target_y = self.origem_y * 150 + 37.5
-            self.canvas.coords(self._drag_data['item'], target_x, target_y)
-            self.origem_x = None
-            self.origem_y = None
 
     def atualizar_tela(self):
         print("#############RECEBIDO#################")

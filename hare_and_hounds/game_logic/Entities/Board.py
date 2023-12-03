@@ -9,7 +9,6 @@ class Board:
     _is_turn: bool
     _total_jogadas: int
     _animal: Animal
-    _pecas : []
 
     def __init__(self, position: int = 0):
         self._board = [[None for _ in range(3)]
