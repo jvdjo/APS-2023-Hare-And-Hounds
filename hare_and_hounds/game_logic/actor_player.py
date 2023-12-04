@@ -8,7 +8,7 @@ from hare_and_hounds.game_logic.Entities.Pecas import Hare, Hound
 from hare_and_hounds.game_logic.Entities.Board import Board
 from hare_and_hounds.game_logic.MenuBar import Menubar
 from typing import Optional
-from hare_and_hounds.game_logic.Entities.Pecas import Animal, Peca_base
+from hare_and_hounds.game_logic.Entities.Pecas import Animal
 
 
 class ActorPlayer(PyNetgamesServerListener):
@@ -97,12 +97,13 @@ class ActorPlayer(PyNetgamesServerListener):
             item = item[0]
             if (item == 5 and self._board._animal == Animal.Hare) or (item != 5 and self._board._animal == Animal.Hound):
                 self._drag_data = {'x': event.x, 'y': event.y, 'item': item}
-                print(self._drag_data)
                 self.origem_x = event.x//150
+                print(self.origem_x)
                 self.origem_y = event.y//150
+                print(self.origem_y)
 
     def arrastar(self, event):
-        if(self.origem_x != None and self.origem_y != None):
+        if (self.origem_x != None and self.origem_y != None):
             delta_x = event.x - self._drag_data['x']
             delta_y = event.y - self._drag_data['y']
             self.canvas.move(self._drag_data['item'], delta_x, delta_y)
@@ -110,11 +111,14 @@ class ActorPlayer(PyNetgamesServerListener):
             self._drag_data['y'] = event.y
 
     def soltar(self, event):
-        if(self.origem_x != None and self.origem_y != None):
+        if (self.origem_x != None and self.origem_y != None):
             if (self._board._is_turn == True):
                 x, y = event.x, event.y
                 col = x // 150
                 row = y // 150
+                origem = (self.origem_x, self.origem_y)
+                print(origem)
+                destino = (col, row)
 
                 if col >= self.cols:
                     col = self.cols - 1
@@ -122,7 +126,8 @@ class ActorPlayer(PyNetgamesServerListener):
                 if (row == 0 and col == 0):
                     target_x = self.origem_x * 150 + 37.5
                     target_y = self.origem_y * 150 + 37.5
-                    self.canvas.coords(self._drag_data['item'], target_x, target_y)
+                    self.canvas.coords(
+                        self._drag_data['item'], target_x, target_y)
                     self.origem_x = None
                     self.origem_y = None
                     return
@@ -130,7 +135,8 @@ class ActorPlayer(PyNetgamesServerListener):
                 if (row == 0 and col == 4):
                     target_x = self.origem_x * 150 + 37.5
                     target_y = self.origem_y * 150 + 37.5
-                    self.canvas.coords(self._drag_data['item'], target_x, target_y)
+                    self.canvas.coords(
+                        self._drag_data['item'], target_x, target_y)
                     self.origem_x = None
                     self.origem_y = None
                     return
@@ -138,7 +144,8 @@ class ActorPlayer(PyNetgamesServerListener):
                 if (row == 2 and col == 0):
                     target_x = self.origem_x * 150 + 37.5
                     target_y = self.origem_y * 150 + 37.5
-                    self.canvas.coords(self._drag_data['item'], target_x, target_y)
+                    self.canvas.coords(
+                        self._drag_data['item'], target_x, target_y)
                     self.origem_x = None
                     self.origem_y = None
                     return
@@ -146,15 +153,17 @@ class ActorPlayer(PyNetgamesServerListener):
                 if (row == 2 and col == 4):
                     target_x = self.origem_x * 150 + 37.5
                     target_y = self.origem_y * 150 + 37.5
-                    self.canvas.coords(self._drag_data['item'], target_x, target_y)
+                    self.canvas.coords(
+                        self._drag_data['item'], target_x, target_y)
                     self.origem_x = None
                     self.origem_y = None
                     return
 
-                if self._board._board[row][col] is None:
+                if self._board._board[row][col] is None and self.validar_movimentacao(origem, destino):
                     target_x = col * 150 + 37.5  # Centralize a imagem nas células da matriz
                     target_y = row * 150 + 37.5  # Centralize a imagem nas células da matriz
-                    self.canvas.coords(self._drag_data['item'], target_x, target_y)
+                    self.canvas.coords(
+                        self._drag_data['item'], target_x, target_y)
                     self._board._board[row][col] = self._drag_data['item']
                     self._board._board[self.origem_y][self.origem_x] = None
                     self.origem_x = None
@@ -169,7 +178,8 @@ class ActorPlayer(PyNetgamesServerListener):
                     target_x = self.origem_x * 150 + 37.5
                     # Centralize a imagem nas células da matriz
                     target_y = self.origem_y * 150 + 37.5
-                    self.canvas.coords(self._drag_data['item'], target_x, target_y)
+                    self.canvas.coords(
+                        self._drag_data['item'], target_x, target_y)
                     self.origem_x = None
                     self.origem_y = None
 
@@ -182,6 +192,33 @@ class ActorPlayer(PyNetgamesServerListener):
                 self.canvas.coords(self._drag_data['item'], target_x, target_y)
                 self.origem_x = None
                 self.origem_y = None
+
+    def validar_movimentacao(self, origem, destino):
+        print("origem:" + str(origem))
+        print("destino:" + str(destino))
+        # Calcula as diferenças nas coordenadas
+        diferenca_x = abs(destino[0] - origem[0])
+        diferenca_y = abs(destino[1] - origem[1])
+        # Permite movimentos em qualquer direção nas outras situações
+        if((origem[0] == 1 or origem[0] == 3) and destino[0] == 2):
+            print("if 1")
+            if(origem[1] == 1 and (destino[1] == 0 or destino[1] == 2)):
+                print("if 1.1")
+                return False
+        if(origem[0] == 2 and (destino[0] == 1 or destino[0] == 3)):
+            print("if 2")
+            if((origem[1] == 0 or origem[1] == 2) and destino[1] == 1):
+                print("if 2.1")
+                return False
+        if(self._board._animal == Animal.Hound):
+            return destino[0] - origem[0] <= 0 and diferenca_y <= 1
+        return diferenca_x <= 1 and diferenca_y <= 1
+    
+    def verificar_vitoria(self):
+        if(self._board._total_jogadas == 50):
+            return Animal.Hare
+        if(self._board._board[4,1] == 5):
+            return Animal.Hare
 
     def atualizar_tela(self):
         print("#############RECEBIDO#################")
