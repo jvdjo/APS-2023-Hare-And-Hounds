@@ -68,6 +68,11 @@ class ActorPlayer(PyNetgamesServerListener):
 
         self._board._board = [[None for _ in range(self.cols)]
                               for _ in range(self.rows)]
+        
+        self._board._board[0][0] = 99
+        self._board._board[0][4] = 99
+        self._board._board[2][0] = 99
+        self._board._board[2][4] = 99
 
         self._board._total_jogadas = 0
 
@@ -98,9 +103,7 @@ class ActorPlayer(PyNetgamesServerListener):
             if (item == 5 and self._board._animal == Animal.Hare) or (item != 5 and self._board._animal == Animal.Hound):
                 self._drag_data = {'x': event.x, 'y': event.y, 'item': item}
                 self.origem_x = event.x//150
-                print(self.origem_x)
                 self.origem_y = event.y//150
-                print(self.origem_y)
 
     def arrastar(self, event):
         if (self.origem_x != None and self.origem_y != None):
@@ -117,7 +120,6 @@ class ActorPlayer(PyNetgamesServerListener):
                 col = x // 150
                 row = y // 150
                 origem = (self.origem_x, self.origem_y)
-                print(origem)
                 destino = (col, row)
 
                 if col >= self.cols:
@@ -170,6 +172,11 @@ class ActorPlayer(PyNetgamesServerListener):
                     self.origem_y = None
                     self._board._total_jogadas += 1
                     self._board._is_turn = False
+                    ganhador = self.verificar_vitoria()
+                    if(ganhador != 0):
+                        print("O jogador" + " " + str(self._board._animal) + " " + "ganhou")
+                        self.reset()
+                        return
                     self.send_move()
 
                 else:
@@ -194,21 +201,15 @@ class ActorPlayer(PyNetgamesServerListener):
                 self.origem_y = None
 
     def validar_movimentacao(self, origem, destino):
-        print("origem:" + str(origem))
-        print("destino:" + str(destino))
         # Calcula as diferenças nas coordenadas
         diferenca_x = abs(destino[0] - origem[0])
         diferenca_y = abs(destino[1] - origem[1])
         # Permite movimentos em qualquer direção nas outras situações
         if ((origem[0] == 1 or origem[0] == 3) and destino[0] == 2):
-            print("if 1")
             if (origem[1] == 1 and (destino[1] == 0 or destino[1] == 2)):
-                print("if 1.1")
                 return False
         if (origem[0] == 2 and (destino[0] == 1 or destino[0] == 3)):
-            print("if 2")
             if ((origem[1] == 0 or origem[1] == 2) and destino[1] == 1):
-                print("if 2.1")
                 return False
         if (self._board._animal == Animal.Hound):
             return destino[0] - origem[0] <= 0 and diferenca_y <= 1
@@ -217,11 +218,30 @@ class ActorPlayer(PyNetgamesServerListener):
     def verificar_vitoria(self):
         if (self._board._total_jogadas == 50):
             return Animal.Hare
-        if (self._board._board[4, 1] == 5):
+        if (self._board._board[1][4] == 5):
             return Animal.Hare
 
+        #busca posição da lebre
+        for linha in range(self.rows):
+            for coluna in range(self.cols):
+                if self._board._board[linha][coluna] == 5:
+                    lebre_x = linha
+                    lebre_y = coluna
+
+        # Verifica as posições ao redor
+        for i in range(max(0, lebre_x - 1), min(lebre_x + 2, self.rows)):
+            for j in range(max(0, lebre_y - 1), min(lebre_y + 2, self.cols)):
+                if self._board._board[i][j] == None:
+                    # print("hare presa")
+                    # if(lebre_x == 1 and lebre_y == 1):
+                    #     print()
+                    #     if(self._board._board[1][0] != None and self._board._board[1][2] != None and self._board._board[2][1] != None):
+                    #         return Animal.Hound
+                    #     return 0
+                    return 0
+        return Animal.Hound
+
     def atualizar_tela(self):
-        print("#############RECEBIDO#################")
         for x in range(self.rows):
             for y in range(self.cols):
                 if (self._board._board[x][y] != None):
@@ -239,6 +259,11 @@ class ActorPlayer(PyNetgamesServerListener):
 
         self._board._board = [[None for _ in range(self.cols)]
                               for _ in range(self.rows)]
+        
+        self._board._board[0][0] = 99
+        self._board._board[0][4] = 99
+        self._board._board[2][0] = 99
+        self._board._board[2][4] = 99
 
         self._board._total_jogadas = 0
 
@@ -262,7 +287,7 @@ class ActorPlayer(PyNetgamesServerListener):
         self.canvas.coords(self.lebre.objeto, lebre_x, lebre_y)
         self._board._board[1][0] = self.lebre.objeto
 
-        if(self._board._animal == Animal.Hound):
+        if(self._board._animal == Animal.Hare):
             self._board._is_turn = False
         self._server_proxy.send_move(self._match_id, self._board.to_dict())
 

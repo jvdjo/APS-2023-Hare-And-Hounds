@@ -13,7 +13,7 @@ class Board:
     def __init__(self, position: int = 0):
         self._board = [[None for _ in range(3)]
                        for _ in range(5)]
-        self._is_turn = position == 0
+        self._is_turn = position == 1
         self._total_jogadas = 0
         self._animal = Animal.Hare if position == 0 else Animal.Hound
         super().__init__()
