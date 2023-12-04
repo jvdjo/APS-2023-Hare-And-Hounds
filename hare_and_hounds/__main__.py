@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import logging
 from hare_and_hounds.game_logic.actor_player import ActorPlayer
 
