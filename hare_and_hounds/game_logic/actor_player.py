@@ -200,24 +200,24 @@ class ActorPlayer(PyNetgamesServerListener):
         diferenca_x = abs(destino[0] - origem[0])
         diferenca_y = abs(destino[1] - origem[1])
         # Permite movimentos em qualquer direção nas outras situações
-        if((origem[0] == 1 or origem[0] == 3) and destino[0] == 2):
+        if ((origem[0] == 1 or origem[0] == 3) and destino[0] == 2):
             print("if 1")
-            if(origem[1] == 1 and (destino[1] == 0 or destino[1] == 2)):
+            if (origem[1] == 1 and (destino[1] == 0 or destino[1] == 2)):
                 print("if 1.1")
                 return False
-        if(origem[0] == 2 and (destino[0] == 1 or destino[0] == 3)):
+        if (origem[0] == 2 and (destino[0] == 1 or destino[0] == 3)):
             print("if 2")
-            if((origem[1] == 0 or origem[1] == 2) and destino[1] == 1):
+            if ((origem[1] == 0 or origem[1] == 2) and destino[1] == 1):
                 print("if 2.1")
                 return False
-        if(self._board._animal == Animal.Hound):
+        if (self._board._animal == Animal.Hound):
             return destino[0] - origem[0] <= 0 and diferenca_y <= 1
         return diferenca_x <= 1 and diferenca_y <= 1
-    
+
     def verificar_vitoria(self):
-        if(self._board._total_jogadas == 50):
+        if (self._board._total_jogadas == 50):
             return Animal.Hare
-        if(self._board._board[4,1] == 5):
+        if (self._board._board[4, 1] == 5):
             return Animal.Hare
 
     def atualizar_tela(self):
@@ -262,6 +262,10 @@ class ActorPlayer(PyNetgamesServerListener):
         self.canvas.coords(self.lebre.objeto, lebre_x, lebre_y)
         self._board._board[1][0] = self.lebre.objeto
 
+        if(self._board._animal == Animal.Hound):
+            self._board._is_turn = False
+        self._server_proxy.send_move(self._match_id, self._board.to_dict())
+
     def run(self):
         self._server_proxy.add_listener(self)
         self._tk.mainloop()
@@ -288,6 +292,7 @@ class ActorPlayer(PyNetgamesServerListener):
         self._board.flip()
         print(self._board)
         self.atualizar_tela()
+        self.botao_reiniciar.config(state=tk.ACTIVE)
 
     def receive_error(self, error: Exception):
         print("ACONTECEU UM ERRO")
@@ -304,3 +309,4 @@ class ActorPlayer(PyNetgamesServerListener):
         print("##############ENVIADO###############")
         self._server_proxy.send_move(
             self._match_id, self._board.to_dict())
+        self.botao_reiniciar.config(state=tk.DISABLED)
