@@ -27,7 +27,6 @@ class ActorPlayer(PyNetgamesServerListener):
         self._menu_bar = Menubar(self._server_proxy, self._tk)
         self._ongoing_match = False
         self.match_id = None
-        self._board = Board()
         self.rows = 3
         self.cols = 5
         self.cell_width = 150
@@ -60,6 +59,7 @@ class ActorPlayer(PyNetgamesServerListener):
             "draggable", "<ButtonPress-1>", self.iniciar_arraste)
         self.canvas.tag_bind("draggable", "<B1-Motion>", self.arrastar)
         self.canvas.tag_bind("draggable", "<ButtonRelease-1>", self.soltar)
+        self._board = Board()
 
     def preparacao_jogo(self):
         self.origem_x = None
@@ -232,12 +232,6 @@ class ActorPlayer(PyNetgamesServerListener):
         for i in range(max(0, lebre_x - 1), min(lebre_x + 2, self.rows)):
             for j in range(max(0, lebre_y - 1), min(lebre_y + 2, self.cols)):
                 if self._board._board[i][j] == None:
-                    # print("hare presa")
-                    # if(lebre_x == 1 and lebre_y == 1):
-                    #     print()
-                    #     if(self._board._board[1][0] != None and self._board._board[1][2] != None and self._board._board[2][1] != None):
-                    #         return Animal.Hound
-                    #     return 0
                     return 0
         return Animal.Hound
 
